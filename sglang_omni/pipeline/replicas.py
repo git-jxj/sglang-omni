@@ -160,6 +160,19 @@ def expand_replica_stages(
         else:
             pass
     for process in plan.processes:
+        if process.replica_devices is not None:
+            for stage_name in process.stage_names:
+                stage = stage_by_name[stage_name]
+                if stage.gpu is not None:
+                    logger.warning(
+                        f"Stage {stage.name!r}: processes.{process.name}.replica_devices "
+                        f"overrides gpu={stage.gpu!r}; replica GPU assignments: "
+                        f"{[replica_stage_gpu(stage, devices) for devices in process.replica_devices]}"
+                    )
+                else:
+                    pass
+        else:
+            pass
         if not process.is_replicated:
             # Note (kaige): replica_devices covers index 0 too, so a single
             # replica still overrides StageConfig.gpu. Names stay unsuffixed
